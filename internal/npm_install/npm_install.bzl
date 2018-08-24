@@ -174,6 +174,11 @@ cd "{root}" && "{npm}" {npm_args}
 
   _create_build_file(repository_ctx, node)
 
+  result = repository_ctx.execute(["find", repository_ctx.path("node_modules"), "-type", "f", "-iname", "BUILD", "-delete"])
+
+  if result.return_code:
+    fail("failed to remove BUILD files in node_modules: %s (%s)" % (result.stdout, result.stderr))
+
 npm_install = repository_rule(
     attrs = dict(COMMON_ATTRIBUTES, **{
         "package_lock_json": attr.label(
@@ -241,6 +246,12 @@ def _yarn_install_impl(repository_ctx):
     fail("yarn_install failed: %s (%s)" % (result.stdout, result.stderr))
 
   _create_build_file(repository_ctx, node)
+
+  result = repository_ctx.execute(["find", repository_ctx.path("node_modules"), "-type", "f", "-iname", "BUILD", "-delete"])
+
+  if result.return_code:
+    fail("failed to remove BUILD files in node_modules: %s (%s)" % (result.stdout, result.stderr))
+
 
 yarn_install = repository_rule(
     attrs = dict(COMMON_ATTRIBUTES, **{
