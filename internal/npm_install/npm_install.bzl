@@ -118,7 +118,15 @@ def _add_data_dependencies(repository_ctx):
         # Make copies of the data files instead of symlinking
         # as yarn under linux will have trouble using symlinked
         # files as npm file:// packages
-        repository_ctx.template("/".join(to), f, {})
+        to = "/".join(to).split("/")
+        to_dir = "/".join(to[:-1])
+        if to_dir:
+            res = repository_ctx.execute(["mkdir", "-p", to_dir])
+            if res.return_code != 0:
+                fail("mkdir failed: " + res.stderr)
+        res = repository_ctx.execute(["cp", repository_ctx.path(f), "/".join(to)])
+        if res.return_code != 0:
+            fail("cp failed: " + res.stderr)
 
 def _npm_install_impl(repository_ctx):
     """Core implementation of npm_install."""
